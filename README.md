@@ -36,32 +36,247 @@ The only UI is small dark popups: confirm → progress → done / error.
 
 ## Install
 
-Download from [Releases](https://github.com/anuzdhk/teku/releases):
+Teku comes in three formats. Pick the one for your distro:
 
-| Distro | File | Install |
+| Your distro | Download | Section |
 |---|---|---|
-| Debian, Ubuntu, Mint, Pop!_OS | `teku_<version>_all.deb` | `sudo apt install ./teku_<version>_all.deb` |
-| Fedora, openSUSE | `teku-<version>-1.noarch.rpm` | `sudo dnf install ./teku-*.rpm` / `sudo zypper install ./teku-*.rpm` |
-| Any Linux | `Teku-<version>-x86_64.AppImage` | `chmod +x` it and open it once; it offers to add itself to the right-click menu |
+| Ubuntu, Debian, Linux Mint, Pop!_OS, Zorin, elementary, KDE Neon | `teku_0.1.1_all.deb` | [Debian / Ubuntu](#debian--ubuntu--mint--pop_os) |
+| Fedora, RHEL, CentOS Stream, Rocky, Alma | `teku-0.1.1-1.fc44.noarch.rpm` | [Fedora](#fedora--rhel) |
+| openSUSE Tumbleweed / Leap | `teku-0.1.1-1.fc44.noarch.rpm` | [openSUSE](#opensuse) |
+| Arch, Manjaro, EndeavourOS, anything else | `Teku-0.1.1-x86_64.AppImage` | [AppImage](#appimage-any-distro) |
 
-Then run `nautilus -q` (or log out and back in) to get **Install with Teku** in the
-Nautilus right-click menu. The AppImage uses the system's `zenity`, `pkexec` and `file`.
+All files are on the [Releases page](https://github.com/anuzdhk/teku/releases/latest).
+Not sure which distro you have? Run `cat /etc/os-release`.
 
-**From source** (any distro):
+---
+
+### What Teku needs
+
+The `.deb` and `.rpm` packages install all of this for you. Only the AppImage and
+source installs need you to check it.
+
+| Program | What for | Already on most desktops? |
+|---|---|---|
+| `bash`, `file` | the script itself, file detection | yes |
+| `pkexec` (polkit) | the password prompt for system installs | yes |
+| `zenity` | the popups | GNOME yes; KDE often no |
+| Nautilus Python plugin | top-level **Install with Teku** in GNOME Files | no (optional) |
+| `flatpak` | installing `.flatpakref` files | varies (optional) |
+
+---
+
+### Debian / Ubuntu / Mint / Pop!_OS
+
+1. Download the package:
+
+   ```bash
+   cd ~/Downloads
+   wget https://github.com/anuzdhk/teku/releases/download/v0.1.1/teku_0.1.1_all.deb
+   ```
+
+2. Install it. Keep the `./`, because without it apt looks for a package
+   called `teku_0.1.1_all.deb` in its repositories:
+
+   ```bash
+   sudo apt install ./teku_0.1.1_all.deb
+   ```
+
+   apt also pulls in `zenity`, `python3-nautilus` and `flatpak` if they're missing.
+
+3. Restart your file manager (GNOME Files / Nautilus):
+
+   ```bash
+   nautilus -q
+   ```
+
+Done. Jump to [Check it works](#check-it-works).
+
+---
+
+### Fedora / RHEL
+
+1. Download and install:
+
+   ```bash
+   cd ~/Downloads
+   wget https://github.com/anuzdhk/teku/releases/download/v0.1.1/teku-0.1.1-1.fc44.noarch.rpm
+   sudo dnf install ./teku-0.1.1-1.fc44.noarch.rpm
+   ```
+
+   dnf also installs `zenity`, `nautilus-python` and `flatpak` if they're missing.
+
+2. Restart Nautilus:
+
+   ```bash
+   nautilus -q
+   ```
+
+---
+
+### openSUSE
+
+The RPM isn't signed, so zypper needs `--allow-unsigned-rpm`:
 
 ```bash
-sudo make install
+cd ~/Downloads
+wget https://github.com/anuzdhk/teku/releases/download/v0.1.1/teku-0.1.1-1.fc44.noarch.rpm
+sudo zypper install --allow-unsigned-rpm ./teku-0.1.1-1.fc44.noarch.rpm
+nautilus -q
 ```
 
-or `make install-user` for a no-root install into `~/.local`. `make deb` builds the
-package into `dist/`. Needs `bash`, `zenity`, `pkexec` and `file`; the top-level
-Nautilus entry also needs `python3-nautilus`.
+The `fc44` in the name is only the build tag. The package is `noarch` and works on openSUSE.
+
+---
+
+### AppImage (any distro)
+
+The AppImage holds Teku itself but uses your system's `zenity`, `pkexec` and
+`file`. It doesn't need the old `libfuse2` library. If it won't start, run it once
+with `--appimage-extract-and-run`.
+
+1. Install `zenity` if you don't have it (`which zenity` prints nothing when it's missing):
+
+   | Distro | Command |
+   |---|---|
+   | Arch / Manjaro | `sudo pacman -S zenity` |
+   | Debian / Ubuntu | `sudo apt install zenity` |
+   | Fedora | `sudo dnf install zenity` |
+   | openSUSE | `sudo zypper install zenity` |
+
+2. Download it, put it somewhere permanent, and make it executable:
+
+   ```bash
+   mkdir -p ~/Applications
+   cd ~/Applications
+   wget https://github.com/anuzdhk/teku/releases/download/v0.1.1/Teku-0.1.1-x86_64.AppImage
+   chmod +x Teku-0.1.1-x86_64.AppImage
+   ```
+
+   The menu entries point to this exact path, so if you move or rename the file
+   later, open it again to update them.
+
+3. Open it once, by double-clicking it or running `./Teku-0.1.1-x86_64.AppImage`.
+   Teku asks **Add Teku to your right-click menu?** Choose **Add**.
+
+4. GNOME Files only: for the top-level menu entry, install the Nautilus Python
+   plugin, then restart Nautilus:
+
+   | Distro | Package |
+   |---|---|
+   | Arch / Manjaro | `python-nautilus` |
+   | Debian / Ubuntu | `python3-nautilus` |
+   | Fedora | `nautilus-python` |
+
+   ```bash
+   nautilus -q
+   ```
+
+   Without the plugin, Teku is still under right-click → **Scripts** and **Open With**.
+
+---
+
+### From source
+
+For developers, or distros not covered above. Needs `git` and `make`.
+
+```bash
+git clone https://github.com/anuzdhk/teku.git
+cd teku
+sudo make install          # system-wide, into /usr
+```
+
+No root? `make install-user` installs into `~/.local` instead.
+
+---
+
+### Check it works
+
+```bash
+teku --version
+```
+
+should print `teku 0.1.1` (skip this for the AppImage). Then right-click any
+`.deb`, `.rpm`, `.AppImage` or `.flatpakref` file:
+
+| File manager | Where to find Teku |
+|---|---|
+| GNOME Files (Nautilus) | **Install with Teku** in the menu (needs the Python plugin), or **Scripts → Install with Teku** |
+| Dolphin (KDE Plasma) | **Install with Teku** in the menu (AppImage: **Open With**) |
+| Nemo (Cinnamon / Mint) | **Install with Teku** in the menu (AppImage: **Open With**) |
+| Any other | **Open With → Install with Teku** |
+
+You can also run it on a file from a terminal: `teku ~/Downloads/some-app.deb`.
+
+---
+
+### Updating
+
+Download the new version and install it the same way. apt, dnf and zypper replace
+the old version. For the AppImage, delete the old file, then open the new one once
+so the menu entries point at it.
+
+---
+
+### Uninstalling
+
+| Installed with | Remove with |
+|---|---|
+| `.deb` | `sudo apt remove teku` |
+| `.rpm` (Fedora) | `sudo dnf remove teku` |
+| `.rpm` (openSUSE) | `sudo zypper remove teku` |
+| `sudo make install` | `sudo make uninstall` (in the source folder) |
+| `make install-user` | `make uninstall-user` |
+
+AppImage: delete the AppImage file, then remove the menu entries it added:
+
+```bash
+rm -f ~/.local/share/applications/teku.desktop \
+      ~/.local/share/icons/hicolor/512x512/apps/teku.png \
+      ~/.local/share/nautilus-python/extensions/teku_nautilus.py \
+      "$HOME/.local/share/nautilus/scripts/Install with Teku"
+```
+
+Uninstalling Teku doesn't touch apps you installed with it.
+
+---
+
+### Troubleshooting
+
+**"Install with Teku" isn't in the right-click menu**
+- Run `nautilus -q`, or log out and back in.
+- GNOME Files: check the Python plugin is installed (see the tables above). Without
+  it, look under **Scripts** or **Open With**.
+- Dolphin / Nemo with the AppImage: use **Open With**. Their menu entries come with
+  the `.deb` / `.rpm`.
+
+**`E: Unsupported file ./teku_0.1.1_all.deb given on commandline`**
+You're not in the folder that holds the file. `cd ~/Downloads` first, or give the full path.
+
+**`sudo: Authentication failed`**
+Type your own login password. Nothing shows while you type.
+
+**Nothing happens when I click Install with Teku**
+Run Teku from a terminal to see what's wrong:
+
+```bash
+teku ~/Downloads/some-app.deb
+```
+
+If it prints text instead of showing popups, `zenity` is missing or there's no display.
+
+**The password prompt never appears**
+Teku uses `pkexec`, which needs your desktop's polkit agent. GNOME, KDE, Cinnamon and
+Xfce include one. Minimal window managers (i3, sway) need one started, for example
+`polkit-gnome` or `lxpolkit`.
+
+**An install failed**
+Click **Show log** in the error popup, or open `~/.local/state/teku/last.log`.
+Every attempt is listed in `~/.local/state/teku/history.log`.
 
 ## Use
 
-- Right-click a file → **Open With → Install with Teku**.
-- Dolphin and Nemo get a top-level **Install with Teku** entry automatically.
-- Nautilus: run `teku --integrate` once, then use right-click → **Scripts → Install with Teku**.
+Right-click an app file → **Install with Teku** (see [Check it works](#check-it-works)
+for where it shows up in each file manager).
 
 From a terminal:
 
