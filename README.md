@@ -335,4 +335,6 @@ installing host packages and adding file-manager menu entries, which is Teku's w
 
 ## License
 
-MIT
+Teku is free software, licensed under the [GNU General Public License v3.0 or later](LICENSE).
+You can use, study, share and change it; if you distribute a modified version, it must
+stay under the GPL with its source available.

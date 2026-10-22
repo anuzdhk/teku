@@ -2,7 +2,7 @@ Name:           teku
 Version:        0.1.2
 Release:        1%{?dist}
 Summary:        Install apps from a right-click
-License:        MIT
+License:        GPL-3.0-or-later
 URL:            https://github.com/anuzdhk/teku
 Source0:        %{url}/archive/v%{version}/teku-%{version}.tar.gz
 BuildArch:      noarch

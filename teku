@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Teku — install apps on Linux from a right-click.
+# SPDX-License-Identifier: GPL-3.0-or-later
 set -uo pipefail
 
 TEKU_VERSION=0.1.2

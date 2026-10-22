@@ -6,7 +6,7 @@ pkgrel=1
 pkgdesc='Install apps from a right-click: .deb, .rpm, AppImage and .flatpakref'
 arch=('any')
 url='https://github.com/anuzdhk/teku'
-license=('MIT')
+license=('GPL-3.0-or-later')
 depends=('bash' 'zenity' 'polkit' 'file')
 conflicts=('teku')
 optdepends=('python-nautilus: top-level "Install with Teku" in GNOME Files'
@@ -17,5 +17,4 @@ sha256sums=('SKIP')
 package() {
     cd "teku-$pkgver"
     make install DESTDIR="$pkgdir" PREFIX=/usr
-    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

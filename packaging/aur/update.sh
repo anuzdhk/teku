@@ -17,7 +17,7 @@ pkgbase = teku-installer
 	pkgrel = $(sed -n 's/^pkgrel=//p' PKGBUILD)
 	url = https://github.com/anuzdhk/teku
 	arch = any
-	license = MIT
+	license = GPL-3.0-or-later
 	depends = bash
 	depends = zenity
 	depends = polkit
