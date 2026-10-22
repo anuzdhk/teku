@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Install with Teku
+GenericName=App Installer
+Comment=Install .deb, .rpm, AppImage and Flatpak files
+Exec=teku %F
+Icon=teku
+Terminal=false
+Categories=System;PackageManager;
+Keywords=install;package;deb;rpm;appimage;flatpak;
+MimeType=application/vnd.debian.binary-package;application/x-rpm;application/x-redhat-package-manager;application/vnd.appimage;application/x-iso9660-appimage;application/vnd.flatpak.ref;application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-apple-diskimage;
+Actions=uninstall-appimage;
+
+[Desktop Action uninstall-appimage]
+Name=Uninstall an AppImage
+Exec=teku --uninstall-appimage

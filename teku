@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# Teku — install apps on Linux from a right-click.
+set -uo pipefail
+
+TEKU_VERSION=0.1.0
+TEKU_ROOT=$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")
+TEKU_DATA=$TEKU_ROOT/data
+TEKU_STATE=${XDG_STATE_HOME:-$HOME/.local/state}/teku
+
+for lib in host detect ui install_deb install_rpm install_appimage install_flatpak; do
+    # shellcheck source=/dev/null
+    . "$TEKU_ROOT/lib/$lib.sh"
+done
+
+usage() {
+    cat <<EOF
+Teku $TEKU_VERSION — install apps from a right-click
+
+Usage:
+  teku [FILE...]              install files (no FILE: pick one)
+  teku --uninstall-appimage [FILE]
+                              remove an AppImage Teku installed
+  teku --detect FILE...       print what Teku sees, install nothing
+  teku --integrate            add "Install with Teku" to Nautilus scripts
+
+Options:
+  -y, --yes                   don't ask for confirmation
+  -h, --help                  show this help
+  -V, --version               show the version
+
+Set TEKU_NO_GUI=1 for terminal-only output.
+EOF
+}
+
+# Append one line per attempt to the history log.
+history_add() {
+    mkdir -p "$TEKU_STATE"
+    printf '%s\t%s\t%s\t%s\n' "$(date -Iseconds)" "$1" "$2" "$3" >>"$TEKU_STATE/history.log"
+}
+
+err_text() {
+    local headline=$1 hint=$2 file=$3
+    printf '%s\n\n<span font_family="monospace" weight="bold" foreground="%s">✖ %s</span>\n<span foreground="%s">%s</span>\n%s' \
+        "$(ui_header error "$TEKU_RED")" "$TEKU_RED" "$(ui_esc "$headline")" \
+        "$TEKU_DIM" "$(ui_esc "$hint")" "$(ui_row file "${file##*/}" "$TEKU_DIM")"
+}
+
+method_label() {
+    case $1 in
+        apt) echo "apt-get install" ;;
+        dnf) echo "dnf install" ;;
+        zypper) echo "zypper install" ;;
+        appimage) echo "~/Applications + menu entry" ;;
+        flatpak) echo "flatpak install" ;;
+    esac
+}
+
+detect() {
+    local f=$1 type family route
+    [[ -f $f ]] || { printf '%s\tnot found\n' "$f"; return 1; }
+    type=$(teku_file_type "$f")
+    family=$(teku_os_family)
+    route=$(teku_route "$type" "$family")
+    printf '%s\ttype=%s\tos=%s\troute=%s\n' "$f" "$type" "$family" "$route"
+}
+
+install_one() {
+    local f=$1 type family osname route method ext log rc
+    if [[ ! -f $f ]]; then
+        ui_error "$(err_text "File not found" "It may have been moved or deleted." "$f")"
+        return 1
+    fi
+
+    type=$(teku_file_type "$f")
+    family=$(teku_os_family)
+    osname=$(teku_os_name)
+    route=$(teku_route "$type" "$family")
+    ext=$(teku_ext "$f")
+
+    # A file named like a package whose contents aren't one.
+    if [[ $type == unknown && $ext =~ ^(deb|rpm|appimage|flatpakref)$ ]]; then
+        route="err:This isn't a real .$ext file|It may be corrupted, incomplete, or a different file that was renamed. Try downloading it again."
+    fi
+
+    if [[ $route == err:* ]]; then
+        route=${route#err:}
+        ui_error "$(err_text "${route%%|*}" "${route#*|}" "$f")"
+        history_add error "$type" "$f"
+        return 1
+    fi
+    method=${route#ok:}
+
+    local text
+    text="$(ui_header install)
+"
+    text+="<span size=\"large\" weight=\"bold\">$(ui_esc "${f##*/}")</span>"
+    text+=$(ui_row type "$(teku_type_label "$type")")
+    text+=$(ui_row system "$osname")
+    text+=$(ui_row method "$(method_label "$method")")
+    if [[ $method == appimage ]]; then
+        text+=$(ui_row dest "$(teku_appimage_dest "$f")" "$TEKU_DIM")
+    fi
+    ui_confirm "$text" Install || return 1
+
+    mkdir -p "$TEKU_STATE"
+    log=$TEKU_STATE/last.log
+    case $method in
+        apt) ui_progress "installing ${f##*/}" "$log" teku_install_deb "$f" ;;
+        dnf | zypper) ui_progress "installing ${f##*/}" "$log" teku_install_rpm "$f" "$method" ;;
+        appimage) ui_progress "installing ${f##*/}" "$log" teku_install_appimage "$f" ;;
+        flatpak) ui_progress "installing ${f##*/}" "$log" teku_install_flatpak "$f" ;;
+    esac
+    rc=$?
+
+    if ((rc == 0)); then
+        history_add ok "$type" "$f"
+        local done_text
+        done_text="$(ui_header done)
+
+<span font_family=\"monospace\" weight=\"bold\" foreground=\"$TEKU_ACCENT\">✔ installed</span>  $(ui_esc "${f##*/}")"
+        [[ $method == appimage ]] && done_text+=$'\n'"<span foreground=\"$TEKU_DIM\">Find it in your app menu.</span>"
+        ui_info "$done_text"
+        return 0
+    fi
+
+    history_add failed "$type" "$f"
+    # pkexec: 126 = dismissed / not authorized, 127 = authentication failed.
+    if ((rc == 126 || rc == 127)) && [[ $method != appimage ]]; then
+        ui_error "$(err_text "Authentication cancelled" "Nothing was installed." "$f")"
+    else
+        ui_error "$(err_text "Install failed (exit $rc)" "See the log for details." "$f")" "$log"
+    fi
+    return 1
+}
+
+uninstall_appimage() {
+    local app=${1:-}
+    if [[ -z $app ]]; then
+        local apps
+        mapfile -t apps < <(teku_appimage_list)
+        if ((${#apps[@]} == 0)); then
+            ui_info "$(ui_header uninstall)
+
+No AppImages installed by Teku."
+            return 0
+        fi
+        app=$(ui_pick "Teku — uninstall" "Pick an AppImage to remove:" "${apps[@]}") || return 1
+        [[ -n $app ]] || return 1
+    fi
+    app=$(readlink -f -- "$app")
+    if ! teku_appimage_list | grep -qxF "$app"; then
+        ui_error "$(err_text "Not installed by Teku" "Only AppImages Teku installed can be removed here." "$app")"
+        return 1
+    fi
+    ui_confirm "$(ui_header uninstall)
+<span size=\"large\" weight=\"bold\">$(ui_esc "${app##*/}")</span>$(ui_row action "move to trash, remove menu entry" "$TEKU_RED")" Remove || return 1
+    teku_uninstall_appimage "$app"
+    history_add removed appimage "$app"
+    ui_info "$(ui_header done)
+
+<span font_family=\"monospace\" weight=\"bold\" foreground=\"$TEKU_ACCENT\">✔ removed</span>  $(ui_esc "${app##*/}")"
+}
+
+integrate() {
+    local dir=${XDG_DATA_HOME:-$HOME/.local/share}/nautilus/scripts
+    mkdir -p "$dir"
+    install -m 755 "$TEKU_DATA/filemanager/nautilus/Install with Teku" "$dir/"
+    echo "Added \"Install with Teku\" to Nautilus (right-click → Scripts)."
+}
+
+pick_file() {
+    if ui_gui; then
+        zenity --file-selection --title "Teku — pick an app to install" \
+            --file-filter "Apps | *.deb *.rpm *.AppImage *.appimage *.flatpakref" \
+            --file-filter "All files | *" 2>/dev/null
+    else
+        usage >&2
+        return 1
+    fi
+}
+
+main() {
+    local files=() mode=install
+    while (($#)); do
+        case $1 in
+            -h | --help) usage; return 0 ;;
+            -V | --version) echo "teku $TEKU_VERSION"; return 0 ;;
+            -y | --yes) export TEKU_YES=1 ;;
+            --detect) mode=detect ;;
+            --uninstall-appimage) mode=uninstall ;;
+            --integrate) mode=integrate ;;
+            --) shift; files+=("$@"); break ;;
+            -*) echo "teku: unknown option $1" >&2; usage >&2; return 2 ;;
+            *) files+=("$1") ;;
+        esac
+        shift
+    done
+
+    case $mode in
+        integrate) integrate; return ;;
+        uninstall) uninstall_appimage "${files[0]:-}"; return ;;
+        detect)
+            local f
+            for f in "${files[@]}"; do detect "$f"; done
+            return 0
+            ;;
+    esac
+
+    if ((${#files[@]} == 0)); then
+        local picked
+        picked=$(pick_file) || return 1
+        files=("$picked")
+    fi
+    local f rc=0
+    for f in "${files[@]}"; do
+        install_one "$f" || rc=1
+    done
+    return $rc
+}
+
+main "$@"

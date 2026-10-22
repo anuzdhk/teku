@@ -1,0 +1,7 @@
+[Nemo Action]
+Name=Install with Teku
+Comment=Install this app with Teku
+Exec=teku %F
+Icon-Name=teku
+Selection=notnone
+Extensions=deb;rpm;AppImage;appimage;flatpakref;exe;msi;dmg;pkg;

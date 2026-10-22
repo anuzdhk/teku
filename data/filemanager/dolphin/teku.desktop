@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Service
+MimeType=application/vnd.debian.binary-package;application/x-rpm;application/x-redhat-package-manager;application/vnd.appimage;application/x-iso9660-appimage;application/vnd.flatpak.ref;application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-apple-diskimage;
+Actions=install;
+X-KDE-Priority=TopLevel
+
+[Desktop Action install]
+Name=Install with Teku
+Icon=teku
+Exec=teku %F
