@@ -36,6 +36,20 @@ The only UI is small dark popups: confirm → progress → done / error.
 
 ## Install
 
+### Quick install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/anuzdhk/teku/main/install.sh | bash
+```
+
+This downloads the latest release for your distro and installs it: the `.deb` with apt
+on Debian/Ubuntu, the `.rpm` with dnf or zypper on Fedora/openSUSE, and the AppImage
+into `~/Applications` everywhere else. It asks for your password for apt, dnf and zypper.
+To force a format, put `TEKU_FORMAT=deb`, `rpm` or `appimage` in front of `bash`.
+You can [read the script](install.sh) first; it's about 90 lines.
+
+### Manual install
+
 Teku comes in three formats. Pick the one for your distro:
 
 | Your distro | Download | Section |
