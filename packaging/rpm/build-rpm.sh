@@ -9,5 +9,5 @@ trap 'rm -rf "$top"' EXIT
 
 mkdir -p "$top/SOURCES" dist
 git archive --format=tar.gz --prefix="teku-$version/" -o "$top/SOURCES/teku-$version.tar.gz" HEAD
-rpmbuild -bb --define "_topdir $top" --define "teku_version $version" packaging/rpm/teku.spec
+rpmbuild -bb --define "_topdir $top" packaging/rpm/teku.spec
 cp "$top"/RPMS/noarch/*.rpm dist/

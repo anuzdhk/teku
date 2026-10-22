@@ -5,7 +5,10 @@ BINDIR := $(PREFIX)/bin
 # Menu entries call teku by absolute path, so ~/.local/bin needn't be on PATH.
 FIXPATH = sed -i -e 's|^Exec=teku|Exec=$(BINDIR)/teku|' -e 's|@BINDIR@|$(BINDIR)|'
 
-.PHONY: install install-user uninstall uninstall-user test deb rpm appimage
+.PHONY: all install install-user uninstall uninstall-user test deb rpm appimage
+
+# Nothing to compile; Debian's build runs plain `make`.
+all:
 
 install:
 	install -Dm755 teku $(SHARE)/teku/teku
@@ -14,6 +17,7 @@ install:
 	ln -sf ../share/teku/teku $(DESTDIR)$(BINDIR)/teku
 	install -Dm644 data/teku.desktop $(SHARE)/applications/teku.desktop
 	install -Dm644 data/icons/teku.png $(SHARE)/icons/hicolor/512x512/apps/teku.png
+	install -Dm644 data/io.github.anuzdhk.Teku.metainfo.xml $(SHARE)/metainfo/io.github.anuzdhk.Teku.metainfo.xml
 	install -Dm644 data/filemanager/dolphin/teku.desktop $(SHARE)/kio/servicemenus/teku.desktop
 	install -Dm644 data/filemanager/nemo/teku.nemo_action $(SHARE)/nemo/actions/teku.nemo_action
 	install -Dm644 data/filemanager/nautilus/teku_nautilus.py $(SHARE)/nautilus-python/extensions/teku_nautilus.py
@@ -33,7 +37,7 @@ install-user:
 uninstall:
 	rm -rf $(SHARE)/teku
 	rm -f $(DESTDIR)$(BINDIR)/teku $(SHARE)/applications/teku.desktop \
-		$(SHARE)/icons/hicolor/512x512/apps/teku.png \
+		$(SHARE)/icons/hicolor/512x512/apps/teku.png $(SHARE)/metainfo/io.github.anuzdhk.Teku.metainfo.xml \
 		$(SHARE)/kio/servicemenus/teku.desktop $(SHARE)/nemo/actions/teku.nemo_action \
 		$(SHARE)/nautilus-python/extensions/teku_nautilus.py
 
@@ -44,8 +48,11 @@ uninstall-user:
 test:
 	tests/run.sh
 
+# Needs debhelper. Same build as the PPA.
 deb:
-	packaging/debian/build-deb.sh
+	dpkg-buildpackage -b -us -uc
+	mkdir -p dist && mv ../teku_*_all.deb dist/
+	rm -f ../teku_*.buildinfo ../teku_*.changes
 
 rpm:
 	packaging/rpm/build-rpm.sh

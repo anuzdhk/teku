@@ -1,0 +1,14 @@
+teku (0.1.2) resolute; urgency=medium
+
+  * Add AppStream metadata.
+  * Show the AppImage destination as ~/Applications in the confirm popup.
+
+ -- anuzdhk <anuzsystem@gmail.com>  Thu, 22 Oct 2026 19:00:00 +0545
+
+teku (0.1.1) resolute; urgency=medium
+
+  * Add .rpm and AppImage builds.
+  * Don't ship mimeinfo.cache or icon caches in the package.
+  * Recommend python3-nautilus for the top-level Nautilus menu entry.
+
+ -- anuzdhk <anuzsystem@gmail.com>  Thu, 22 Oct 2026 18:00:00 +0545

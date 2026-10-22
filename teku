@@ -2,11 +2,11 @@
 # Teku — install apps on Linux from a right-click.
 set -uo pipefail
 
-TEKU_VERSION=0.1.1
+TEKU_VERSION=0.1.2
 TEKU_ROOT=$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")
 TEKU_STATE=${XDG_STATE_HOME:-$HOME/.local/state}/teku
 
-for lib in host detect ui install_deb install_rpm install_appimage install_flatpak; do
+for lib in detect ui install_deb install_rpm install_appimage install_flatpak; do
     # shellcheck source=/dev/null
     . "$TEKU_ROOT/lib/$lib.sh"
 done

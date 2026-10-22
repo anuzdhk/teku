@@ -1,0 +1,3 @@
+# Keep the default VCS ignores, plus local build output.
+tar-ignore
+tar-ignore = "dist"

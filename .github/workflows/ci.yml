@@ -1,0 +1,32 @@
+# Tests and package builds on every push, so packaging breaks show up before a release.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: tests/run.sh
+      - run: sudo apt-get update && sudo apt-get install -y appstream desktop-file-utils
+      - run: appstreamcli validate --no-net data/io.github.anuzdhk.Teku.metainfo.xml
+      - run: desktop-file-validate data/teku.desktop
+
+  deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y debhelper
+      - run: make deb && dpkg-deb -c dist/*.deb
+
+  rpm:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - run: dnf install -y git make rpm-build
+      - uses: actions/checkout@v4
+      - run: git config --global --add safe.directory "$PWD" && make rpm

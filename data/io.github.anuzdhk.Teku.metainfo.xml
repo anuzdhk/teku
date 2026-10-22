@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.anuzdhk.Teku</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Teku</name>
+  <summary>Install apps from a right-click</summary>
+  <developer id="io.github.anuzdhk">
+    <name>anuzdhk</name>
+  </developer>
+  <description>
+    <p>
+      Right-click a downloaded app and choose “Install with Teku”. Teku checks the
+      file's contents and your distro, then installs it the right way, or tells you
+      plainly why it can't.
+    </p>
+    <ul>
+      <li>.deb packages on Debian, Ubuntu, Linux Mint and Pop!_OS</li>
+      <li>.rpm packages on Fedora and openSUSE</li>
+      <li>AppImages: moved to ~/Applications with a menu entry and icon</li>
+      <li>.flatpakref files on any distro with Flatpak</li>
+      <li>Clear messages for Windows and macOS apps, or packages for another distro</li>
+    </ul>
+    <p>
+      Works in GNOME Files, Dolphin and Nemo. The only interface is a few small
+      popups: confirm, progress, done.
+    </p>
+  </description>
+  <launchable type="desktop-id">teku.desktop</launchable>
+  <icon type="stock">teku</icon>
+  <categories>
+    <category>System</category>
+    <category>PackageManager</category>
+  </categories>
+  <keywords>
+    <keyword>install</keyword>
+    <keyword>deb</keyword>
+    <keyword>rpm</keyword>
+    <keyword>appimage</keyword>
+    <keyword>flatpak</keyword>
+  </keywords>
+  <url type="homepage">https://github.com/anuzdhk/teku</url>
+  <url type="bugtracker">https://github.com/anuzdhk/teku/issues</url>
+  <url type="vcs-browser">https://github.com/anuzdhk/teku</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Confirm an install</caption>
+      <image>https://raw.githubusercontent.com/anuzdhk/teku/main/screenshots/confirm.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Installing</caption>
+      <image>https://raw.githubusercontent.com/anuzdhk/teku/main/screenshots/progress.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Done</caption>
+      <image>https://raw.githubusercontent.com/anuzdhk/teku/main/screenshots/done.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.2" date="2026-10-22">
+      <description>
+        <p>Adds AppStream metadata for software centers. The AppImage confirm popup shows ~/Applications instead of the full path.</p>
+      </description>
+    </release>
+    <release version="0.1.1" date="2026-10-22">
+      <description>
+        <p>Adds .rpm and AppImage downloads. Fixes the .deb shipping a MIME cache file.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2026-10-22"/>
+  </releases>
+</component>

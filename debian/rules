@@ -1,0 +1,4 @@
+#!/usr/bin/make -f
+# dh_auto_install runs `make install DESTDIR=debian/teku` (PREFIX defaults to /usr).
+%:
+	dh $@

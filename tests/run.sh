@@ -17,7 +17,6 @@ check() { # NAME EXPECTED ACTUAL
     fi
 }
 
-. lib/host.sh
 . lib/detect.sh
 
 # --- fixtures
@@ -80,6 +79,13 @@ check "rpm on ubuntu"   "err:This package is for Fedora/openSUSE systems" "$(tek
 check "exe"             "err:This is a Windows app" "$(teku_route windows debian | cut -d'|' -f1)"
 check "dmg"             "err:This is a macOS app"   "$(teku_route macos debian | cut -d'|' -f1)"
 check "unknown"         "err:Unsupported file type" "$(teku_route unknown debian | cut -d'|' -f1)"
+
+# --- every package declares the same version
+v=$(sed -n 's/^TEKU_VERSION=//p' teku)
+check "spec version"      "$v" "$(sed -n 's/^Version: *//p' packaging/rpm/teku.spec)"
+check "debian version"    "$v" "$(sed -n '1s/^teku (\([^)]*\)).*/\1/p' debian/changelog)"
+check "PKGBUILD version"  "$v" "$(sed -n 's/^pkgver=//p' packaging/aur/PKGBUILD)"
+check "metainfo version"  "$v" "$(grep -m1 -o 'release version="[^"]*"' data/io.github.anuzdhk.Teku.metainfo.xml | cut -d'"' -f2)"
 
 # --- end to end, sandboxed HOME
 export HOME=$tmp/home XDG_DATA_HOME=$tmp/home/.local/share XDG_STATE_HOME=$tmp/home/.local/state

@@ -106,7 +106,7 @@ teku_route() {
             ;;
         appimage) echo ok:appimage ;;
         flatpakref)
-            if command -v flatpak >/dev/null || [[ -f /.flatpak-info ]]; then
+            if command -v flatpak >/dev/null; then
                 echo ok:flatpak
             else
                 echo "err:Flatpak isn't installed|Install the flatpak package with your package manager, then try again."

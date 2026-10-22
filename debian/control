@@ -1,0 +1,18 @@
+Source: teku
+Section: admin
+Priority: optional
+Maintainer: anuzdhk <anuzsystem@gmail.com>
+Build-Depends: debhelper-compat (= 13), file
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/anuzdhk/teku
+Vcs-Browser: https://github.com/anuzdhk/teku
+Vcs-Git: https://github.com/anuzdhk/teku.git
+
+Package: teku
+Architecture: all
+Depends: ${misc:Depends}, bash (>= 4.4), zenity, pkexec | policykit-1, file
+Recommends: flatpak, python3-nautilus
+Description: install apps from a right-click
+ Teku detects a downloaded file's type and your distro, then installs
+ .deb, .rpm, AppImage and .flatpakref files, or explains why it can't.

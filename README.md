@@ -297,23 +297,27 @@ teku                    entry point
 lib/detect.sh           file type + OS detection, routing rules
 lib/ui.sh               zenity popups (dark, terminal style) + terminal fallback
 lib/install_*.sh        one installer per format
-lib/host.sh             runs host commands via flatpak-spawn inside Flatpak
-data/                   desktop entry, icon, file-manager integrations
-packaging/              .deb, .rpm and AppImage builders, Flathub + Snap drafts
-.github/workflows/      release build: tag vX.Y.Z to publish all three
-tests/run.sh            detection and AppImage tests
+data/                   desktop entry, icon, AppStream metadata, file-manager integrations
+debian/                 Debian source package (release .deb and PPA)
+packaging/rpm/          RPM spec (release .rpm and COPR)
+packaging/aur/          Arch PKGBUILD
+packaging/appimage/     AppImage build
+.github/workflows/      ci: tests + package builds; release: tag vX.Y.Z to publish
+tests/run.sh            detection, AppImage and version-consistency tests
 ```
 
 ## Distribution
 
-1. **Primary:** `.deb` on GitHub Releases.
-2. **Flathub:** `packaging/flatpak/` — runs installs through `flatpak-spawn --host`,
-   which needs `--talk-name=org.freedesktop.Flatpak`. Reviewers will look hard at
-   that; the submission must explain that installing host packages is the app's purpose.
-3. **Snap Store:** `packaging/snap/` — needs classic confinement, which is reviewed by
-   hand and often refused for installers.
+Teku ships through GitHub Releases and distro repositories, so it keeps its full
+right-click integration. It isn't on Flathub or the Snap Store: both sandboxes block
+installing host packages and adding file-manager menu entries, which is Teku's whole job.
 
-The Flatpak and Snap manifests are untested drafts.
+| Channel | Status |
+|---|---|
+| GitHub Releases (.deb, .rpm, AppImage) | ✅ published |
+| Ubuntu PPA | ready to upload — see [PUBLISHING.md](PUBLISHING.md) |
+| Fedora COPR | ready to set up — see [PUBLISHING.md](PUBLISHING.md) |
+| Arch AUR | ready to push — see [PUBLISHING.md](PUBLISHING.md) |
 
 ## License
 
