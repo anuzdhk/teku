@@ -1,0 +1,71 @@
+# Builds the .deb, .rpm and AppImage and attaches them to the GitHub release.
+# Runs on version tags, or by hand for an existing tag.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re)build, e.g. v0.1.0
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
+      - run: tests/run.sh
+
+  deb:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
+      - run: make deb
+      - uses: actions/upload-artifact@v4
+        with: { name: deb, path: dist/* }
+
+  rpm:
+    needs: test
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - run: dnf install -y git make rpm-build
+      - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
+      - run: git config --global --add safe.directory "$PWD" && make rpm
+      - uses: actions/upload-artifact@v4
+        with: { name: rpm, path: dist/* }
+
+  appimage:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
+      - run: make appimage
+      - uses: actions/upload-artifact@v4
+        with: { name: appimage, path: dist/* }
+
+  publish:
+    needs: [deb, rpm, appimage]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "Teku ${TAG#v}" --generate-notes
+          gh release upload "$TAG" dist/* -R "$GITHUB_REPOSITORY" --clobber

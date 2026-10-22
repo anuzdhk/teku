@@ -1,3 +1,0 @@
-#!/bin/sh
-# Nautilus passes the selected local files as arguments.
-exec teku "$@"

@@ -21,15 +21,16 @@ The only UI is small dark popups: confirm → progress → done / error.
 
 ## Install
 
-**Debian / Ubuntu / Mint / Pop!_OS:** download `teku_<version>_all.deb` from
-[Releases](https://github.com/anuzdhk/teku/releases) and install it:
+Download from [Releases](https://github.com/anuzdhk/teku/releases):
 
-```bash
-sudo apt install ./teku_0.1.0_all.deb
-```
+| Distro | File | Install |
+|---|---|---|
+| Debian, Ubuntu, Mint, Pop!_OS | `teku_<version>_all.deb` | `sudo apt install ./teku_<version>_all.deb` |
+| Fedora, openSUSE | `teku-<version>-1.noarch.rpm` | `sudo dnf install ./teku-*.rpm` / `sudo zypper install ./teku-*.rpm` |
+| Any Linux | `Teku-<version>-x86_64.AppImage` | `chmod +x` it and open it once; it offers to add itself to the right-click menu |
 
 Then run `nautilus -q` (or log out and back in) to get **Install with Teku** in the
-Nautilus right-click menu.
+Nautilus right-click menu. The AppImage uses the system's `zenity`, `pkexec` and `file`.
 
 **From source** (any distro):
 
@@ -68,7 +69,8 @@ lib/ui.sh               zenity popups (dark, terminal style) + terminal fallback
 lib/install_*.sh        one installer per format
 lib/host.sh             runs host commands via flatpak-spawn inside Flatpak
 data/                   desktop entry, icon, file-manager integrations
-packaging/              .deb builder, Flathub + Snap drafts
+packaging/              .deb, .rpm and AppImage builders, Flathub + Snap drafts
+.github/workflows/      release build: tag vX.Y.Z to publish all three
 tests/run.sh            detection and AppImage tests
 ```
 

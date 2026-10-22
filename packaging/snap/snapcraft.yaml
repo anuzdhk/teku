@@ -2,7 +2,7 @@
 # hand and often refuses for installers — see README.
 name: teku
 base: core24
-version: '0.1.0'
+version: '0.1.1'
 summary: Install apps from a right-click
 description: |
   Teku detects a downloaded file's type and your distro, then installs

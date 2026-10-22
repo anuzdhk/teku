@@ -1,0 +1,4 @@
+#!/bin/sh
+# Uses the host's bash, zenity, pkexec and file; only Teku itself is bundled.
+HERE=$(dirname "$(readlink -f "$0")")
+exec "$HERE/usr/share/teku/teku" "$@"

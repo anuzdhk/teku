@@ -2,9 +2,8 @@
 # Teku — install apps on Linux from a right-click.
 set -uo pipefail
 
-TEKU_VERSION=0.1.0
+TEKU_VERSION=0.1.1
 TEKU_ROOT=$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")
-TEKU_DATA=$TEKU_ROOT/data
 TEKU_STATE=${XDG_STATE_HOME:-$HOME/.local/state}/teku
 
 for lib in host detect ui install_deb install_rpm install_appimage install_flatpak; do
@@ -162,10 +161,39 @@ No AppImages installed by Teku."
 }
 
 integrate() {
-    local dir=${XDG_DATA_HOME:-$HOME/.local/share}/nautilus/scripts
-    mkdir -p "$dir"
-    install -m 755 "$TEKU_DATA/filemanager/nautilus/Install with Teku" "$dir/"
-    echo "Added \"Install with Teku\" to Nautilus (right-click → Scripts)."
+    local share=${XDG_DATA_HOME:-$HOME/.local/share}
+    local bin=${APPIMAGE:-$(readlink -f -- "$0")}
+    mkdir -p "$share/nautilus/scripts"
+    printf '#!/bin/sh\nexec "%s" "$@"\n' "$bin" >"$share/nautilus/scripts/Install with Teku"
+    chmod 755 "$share/nautilus/scripts/Install with Teku"
+
+    # As an AppImage nothing is installed system-wide, so register the
+    # AppImage itself for Open With, the app menu and Nautilus' menu.
+    if [[ -n ${APPIMAGE:-} && -n ${APPDIR:-} ]]; then
+        mkdir -p "$share/applications" "$share/icons/hicolor/512x512/apps" "$share/nautilus-python/extensions"
+        sed "s|^Exec=/usr/bin/teku|Exec=\"$bin\"|" "$APPDIR/usr/share/applications/teku.desktop" \
+            >"$share/applications/teku.desktop"
+        cp "$APPDIR/teku.png" "$share/icons/hicolor/512x512/apps/teku.png"
+        sed "s|^TEKU = .*|TEKU = \"$bin\"|" "$APPDIR/usr/share/nautilus-python/extensions/teku_nautilus.py" \
+            >"$share/nautilus-python/extensions/teku_nautilus.py"
+        update-desktop-database "$share/applications" 2>/dev/null || true
+    fi
+    echo "Added \"Install with Teku\" to the right-click menu. Restart Nautilus (nautilus -q) to see it."
+}
+
+# First launch of the AppImage: offer to add the right-click entries.
+appimage_first_run() {
+    [[ -n ${APPIMAGE:-} ]] || return 1
+    local entry=${XDG_DATA_HOME:-$HOME/.local/share}/applications/teku.desktop
+    grep -qF "Exec=\"$APPIMAGE\"" "$entry" 2>/dev/null && return 1
+    ui_confirm "$(ui_header setup)
+<span size=\"large\" weight=\"bold\">Add Teku to your right-click menu?</span>$(ui_row app "$APPIMAGE" "$TEKU_DIM")
+<span foreground=\"$TEKU_DIM\">Keep the AppImage where it is; the menu entries point to it.</span>" Add || return 0
+    integrate >/dev/null
+    ui_info "$(ui_header done)
+
+<span font_family=\"monospace\" weight=\"bold\" foreground=\"$TEKU_ACCENT\">✔ added</span>  Right-click an app file → Install with Teku
+<span foreground=\"$TEKU_DIM\">Nautilus: run nautilus -q or log out and back in first.</span>"
 }
 
 pick_file() {
@@ -207,6 +235,7 @@ main() {
     esac
 
     if ((${#files[@]} == 0)); then
+        appimage_first_run && return 0
         local picked
         picked=$(pick_file) || return 1
         files=("$picked")
