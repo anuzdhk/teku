@@ -97,7 +97,9 @@ install_one() {
     text+=$(ui_row system "$osname")
     text+=$(ui_row method "$(method_label "$method")")
     if [[ $method == appimage ]]; then
-        text+=$(ui_row dest "$(teku_appimage_dest "$f")" "$TEKU_DIM")
+        local dest
+        dest=$(teku_appimage_dest "$f")
+        text+=$(ui_row dest "${dest/#"$HOME"/\~}" "$TEKU_DIM")
     fi
     ui_confirm "$text" Install || return 1
 

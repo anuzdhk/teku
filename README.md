@@ -19,6 +19,21 @@ a renamed file can't fool Teku. The distro comes from `/etc/os-release`
 
 The only UI is small dark popups: confirm → progress → done / error.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center" rowspan="3" valign="top"><b>1. Right-click a file</b><br><br><img src="screenshots/menu.png" width="220" alt="Install with Teku in the Nautilus right-click menu"></td>
+    <td align="center"><b>2. Confirm</b><br><img src="screenshots/confirm.png" width="520" alt="Teku confirm popup for a .deb on Ubuntu"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>3. Installing</b><br><img src="screenshots/progress.png" width="520" alt="Teku progress popup showing apt output"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>4. Done</b><br><img src="screenshots/done.png" width="520" alt="Teku done popup"></td>
+  </tr>
+</table>
+
 ## Install
 
 Download from [Releases](https://github.com/anuzdhk/teku/releases):
