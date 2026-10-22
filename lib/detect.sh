@@ -19,7 +19,7 @@ _teku_is_appimage() {
 
 _teku_is_dmg() {
     # UDIF images end with a 512-byte "koly" trailer.
-    [[ $(tail -c 512 -- "$1" 2>/dev/null | head -c 4) == koly ]]
+    [[ $(tail -c 512 -- "$1" 2>/dev/null | head -c 4 | tr -d '\0') == koly ]]
 }
 
 # Echoes one of: deb rpm appimage flatpakref windows macos unknown.
